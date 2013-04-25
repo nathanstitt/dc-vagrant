@@ -1,0 +1,25 @@
+# This file was automatically generated and dropped off by 
+# the DocumentCloud Chef recipe!
+
+# PostgreSQL Client Authentication Configuration File
+# ===================================================
+#
+# Refer to the "Client Authentication" section in the PostgreSQL
+# documentation for a complete description of this file.
+
+<% if node['postgresql']['version'].to_f < 9.1 -%>
+# TYPE  DATABASE        USER            CIDR-ADDRESS            METHOD
+<% elsif node['postgresql']['version'].to_f >= 9.1 -%>
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+<% end -%>
+<% node['postgresql']['pg_hba'].each do |auth| -%>
+
+<%   if auth[:comment] %>
+<%= auth[:comment] %>
+<%   end %>
+<%   if auth[:addr] %>
+<%= auth[:type].ljust(7) %> <%= auth[:db].ljust(15) %> <%= auth[:user].ljust(15) %> <%= auth[:addr].ljust(23) %> <%= auth[:method] %>
+<%   else %>
+<%= auth[:type].ljust(7) %> <%= auth[:db].ljust(15) %> <%= auth[:user].ljust(15) %>                         <%= auth[:method] %>
+<%   end %>
+<% end %>

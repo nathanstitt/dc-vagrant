@@ -1,0 +1,13 @@
+server {
+  listen  80;
+  include documentcloud.conf;
+}
+
+server {
+  listen              443;
+  ssl                 on;
+  ssl_certificate     <%= node[:nginx][:documentcloud][:cert_path ] %>;
+  ssl_certificate_key <%= node[:nginx][:documentcloud][:key_path  ] %>;
+
+  include             documentcloud.conf;
+}

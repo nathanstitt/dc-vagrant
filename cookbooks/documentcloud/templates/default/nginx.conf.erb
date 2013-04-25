@@ -1,0 +1,43 @@
+user <%= node[:nginx][:user] %> <%= node[:nginx][:group] %>;
+worker_processes <%= node[:nginx][:worker_processes] %>;
+
+error_log  <%= node[:nginx][:log_directory] %>/error.log;
+pid        <%= node[:nginx][:pid] %>;
+
+events {
+  worker_connections 1024;
+}
+
+http {
+  passenger_root <%= @passenger_root.call %>;
+  passenger_ruby <%= @passenger_ruby_path.call %>;
+  passenger_default_user www-data;
+  passenger_pool_idle_time 0;
+  passenger_max_pool_size 4;
+
+  include       mime.types;
+  default_type  application/octet-stream;
+  access_log    /var/log/nginx/access.log;
+
+  sendfile              on;
+  tcp_nopush            on;
+  keepalive_timeout     2;
+  client_max_body_size  200M;
+  
+  ssl_ciphers         ALL:!aNULL:!ADH:!eNULL:!MEDIUM:!LOW:!EXP:!kEDH:RC4+RSA:+HIGH;
+  ssl_session_cache   shared:SSL:10m;
+  ssl_session_timeout 10m;
+
+  gzip            on;
+  gzip_static     on;
+  gzip_comp_level 2;
+  gzip_proxied    any;
+  gzip_vary       on;
+  gzip_types      text/plain text/css application/x-javascript application/json text/xml application/xml application/xml+rss text/javascript;
+
+  include /usr/local/nginx/conf/sites-enabled/*.conf;
+}
+
+<% node[:passenger][:pre_start].each do | url | %>
+   passenger_pre_start <%= url %>;
+<% end %>

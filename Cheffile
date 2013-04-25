@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+#^syntax detection
+
+
+# Vagrant Chef Howto - http://bit.ly/RPC4uI
+#
+site 'http://community.opscode.com/api/v1'
+
+cookbook 'documentcloud', :git=>'https://github.com/nathanstitt/documentcloud-chef.git'
+cookbook 'postgresql'
+cookbook 'rake',          :git=>'https://github.com/nathanstitt/chef-recipe-rake.git'

@@ -1,0 +1,56 @@
+SITE
+  remote: http://community.opscode.com/api/v1
+  specs:
+    apt (1.9.2)
+    build-essential (1.4.0)
+    chef_handler (1.1.4)
+    dmg (1.1.0)
+    git (2.5.0)
+      build-essential (>= 0.0.0)
+      dmg (>= 0.0.0)
+      runit (>= 1.0)
+      windows (>= 0.0.0)
+      yum (>= 0.0.0)
+    hostname (0.0.6)
+      hostsfile (>= 0.0.0)
+    hostsfile (1.0.0)
+    openssl (1.0.2)
+    postgresql (2.4.0)
+      apt (>= 0.0.0)
+      build-essential (>= 0.0.0)
+      openssl (>= 0.0.0)
+    runit (1.1.2)
+      build-essential (>= 0.0.0)
+      yum (>= 0.0.0)
+    ssh_known_hosts (0.7.4)
+    user (0.3.0)
+    windows (1.8.10)
+      chef_handler (>= 0.0.0)
+    yum (2.2.0)
+
+GIT
+  remote: https://github.com/nathanstitt/chef-recipe-rake.git
+  ref: master
+  sha: 5ecbc444b1fd57178b12da88c125ce98e6d5b989
+  specs:
+    rake (0.1.0)
+
+GIT
+  remote: https://github.com/nathanstitt/documentcloud-chef.git
+  ref: master
+  sha: eb5785daacdd841732f4933cabe2ca62e704f229
+  specs:
+    documentcloud (0.0.5)
+      apt (>= 0.0.0)
+      git (>= 0.0.0)
+      hostname (>= 0.0.0)
+      postgresql (>= 0.0.0)
+      rake (>= 0.0.0)
+      ssh_known_hosts (>= 0.0.0)
+      user (>= 0.0.0)
+
+DEPENDENCIES
+  documentcloud (>= 0)
+  postgresql (>= 0)
+  rake (>= 0)
+

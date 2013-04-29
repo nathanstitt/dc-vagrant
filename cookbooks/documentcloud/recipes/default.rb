@@ -7,6 +7,8 @@ include_recipe 'apt'
 include_recipe 'postgresql::server'
 include_recipe 'rake'
 
+ssh_known_hosts_entry 'github.com'
+
 # Variables from config
 install_dir = Pathname.new node[:documentcloud][:directory]
 user_id     = node[:account][:login]
@@ -44,23 +46,20 @@ user_account 'user-account' do
   ssh_keys     node[:account][:ssh_keys] if node.account.ssh_keys
 end
 
-ssh_known_hosts_entry 'github.com'
-
-#STDERR.puts ( node['documentcloud']['git'] ).to_yaml
-
-
 git install_dir.to_s do
   repository node.documentcloud.git.repository
   revision   node.documentcloud.git.branch
   user user_id
   action :sync
+  notifies :create, 'ruby_block[copy-server-secrets]', :immediately
   not_if { install_dir.exist? }
 end
 
 ruby_block "copy-server-secrets" do
   block do
-    FileUtils.cp_r( install_dir.join('config','server','secrets'), install_dir ) unless install_dir.join('secrets').exist?
+    FileUtils.cp_r( install_dir.join('config','server','secrets'), install_dir ) 
   end
+  action :nothing
 end
 
 include_recipe "documentcloud::postgresql"

@@ -31,7 +31,6 @@ Vagrant.configure("2") do |config|
   # the path on the host to the actual folder. The second argument is
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
-  # config.vm.synced_folder "../data", "/vagrant_data"
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
@@ -80,10 +79,15 @@ Vagrant.configure("2") do |config|
     # Vagrant Chef Howto - http://bit.ly/RPC4uI
     chef.cookbooks_path = ["cookbooks"]
     chef.add_recipe 'documentcloud'
+    chef.add_recipe 'sudo'
+
+#    Enable extra debugging
+#    chef.log_level = :debug
+
     chef.json = {
+      :login => 'documentcloud',
       :set_fqdn=>'dev.dcloud.org',
       :account => {
-        :login => 'documentcloud',
         :ssh_keys => [
           'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key'
           ]
@@ -92,6 +96,13 @@ Vagrant.configure("2") do |config|
         :git=>{
           :repository => 'https://github.com/nathanstitt/documentcloud.git',
           :branch     => 'chef'
+        }
+      },
+      "authorization" => {
+        "groups" => ["admin", "wheel", "sysadmin"],
+        "sudo" => {
+          "users" => ['vagrant'],
+          "passwordless" => true
         }
       },
       'postgresql'=>{

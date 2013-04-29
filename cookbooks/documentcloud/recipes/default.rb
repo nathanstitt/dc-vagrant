@@ -14,9 +14,9 @@ user_id     = node[:account][:login]
 # Apt packages
 DEBS=\
   %w{ build-essential libcurl4-openssl-dev libssl-dev zlib1g-dev libpcre3-dev ruby1.8 rubygems } +
-  %w{ postgresql libpq-dev git sqlite3 libsqlite3-dev libpcre3-dev lzop libxml2-dev curl       } +
+  %w{ postgresql postgresql-contrib libpq-dev git sqlite3 libsqlite3-dev libpcre3-dev lzop     } +
   %w{ libxslt-dev libcurl4-gnutls-dev libitext-java graphicsmagick pdftk xpdf poppler-utils    } +
-  %w{ libreoffice libreoffice-java-common tesseract-ocr ghostscript                            }
+  %w{ libreoffice libreoffice-java-common tesseract-ocr ghostscript libxml2-dev curl           }
 DEBS.each do | pkg |
   package pkg
 end
@@ -46,11 +46,15 @@ end
 
 ssh_known_hosts_entry 'github.com'
 
+#STDERR.puts ( node['documentcloud']['git'] ).to_yaml
+
+
 git install_dir.to_s do
   repository node.documentcloud.git.repository
-  revision  node.documentcloud.git.branch
+  revision   node.documentcloud.git.branch
   user user_id
-  action :checkout
+  action :sync
+  not_if { install_dir.exist? }
 end
 
 ruby_block "copy-server-secrets" do
@@ -74,18 +78,32 @@ bash "install-rails" do
   not_if "gem list rails | grep  `grep -E -o 'RAILS_GEM_VERSION.*[0-9]+\.[0-9]+\.[0-9]+' #{install_dir}/config/environment.rb | cut -d\\' -f2`"
 end
 
+# bash "install-rails" do
+#   user "root"
+#   cwd install_dir.to_s
+#   code <<-EOS
+# end
+
 rake 'migrate-db' do
   working_directory install_dir.to_s
   arguments 'db:migrate'
 end
 
-rake 'cloud-crowd-server' do
-  user user_id
-  arguments 'crowd:server:start'
-  working_directory install_dir.to_s
-  notifies :run, "rake[cloud-crowd-node]"
-  action :run
-  not_if { File.exists?(install_dir.join('tmp','pids','server.pid') ) }
+ruby "configure-cloud-crowd-host" do
+  user 'root'
+  cwd install_dir.to_s
+  code <<-EOS
+    require 'erb'; require 'uri'; require 'yaml'
+    ENV['RAILS_ENV'] = "#{node.documentcloud.rails_env}"
+    config = YAML.load( ERB.new(File.read( "#{install_dir.join('config', 'document_cloud.yml')}" ) ).result(binding) )[ "#{node.documentcloud.rails_env}" ]
+    host = URI.parse( config['cloud_crowd_server'] ).host
+    File.open('/etc/hosts','r+') do | file |
+      unless file.grep(/#\{host\}/).any?
+        file.seek(0,IO::SEEK_END  )
+        file.write("127.0.0.1        #\{host\}\n")
+      end
+    end
+  EOS
 end
 
 ruby "configure-cloud-crowd" do
@@ -104,16 +122,48 @@ ruby "configure-cloud-crowd" do
     end
     db.close
   EOS
-  not_if { File.exists?( install_dir.join('cloud_crowd.db') ) }
+  not_if { install_dir.join('cloud_crowd.db').exist? }
 end
 
+ruby "configure-account" do
+  user user_id
+  cwd install_dir.to_s
+  code <<-EOS
+  require "./config/environment"
+
+  organization = Organization.find_or_create_by_id(1)
+  organization.slug = "#{node.documentcloud.organization.slug}"
+  organization.name = "#{node.documentcloud.organization.name}"
+  organization.save!
+
+  account = Account.find_or_create_by_email("#{node.documentcloud.account.email}")
+  account.first_name = "#{node.documentcloud.account.first_name}"
+  account.last_name  = "#{node.documentcloud.account.last_name}"
+  account.hashed_password = BCrypt::Password.create( "#{node.documentcloud.account.password}" )
+  account.save!
+
+  unless organization.accounts.exists?( { :email=>"#{node.documentcloud.account.email}" } )
+    organization.add_member( account, Account::ADMINISTRATOR )
+  end
+  EOS
+#  not_if { install_dir.join('cloud_crowd.db').exist? }
+end
+
+rake 'cloud-crowd-server' do
+  user user_id
+  arguments 'crowd:server:start'
+  working_directory install_dir.to_s
+  notifies :run, "rake[cloud-crowd-node]"
+  action :run
+  not_if { install_dir.join('tmp','pids','server.pid').exist? }
+end
 
 rake 'cloud-crowd-node' do
   user user_id
   working_directory install_dir.to_s
   arguments 'crowd:node:start'
   action :run
-  not_if { File.exists?(install_dir.join('tmp','pids','node.pid') ) }
+  not_if { install_dir.join('tmp','pids','node.pid').exist? }
 end
 
 rake 'sunspot-solr' do
@@ -121,7 +171,7 @@ rake 'sunspot-solr' do
   working_directory install_dir.to_s
   arguments 'sunspot:solr:start'
   action :run
-  not_if { File.exists?(install_dir.join('tmp','pids',"sunspot-solr-#{node.documentcloud.rails_env}.pid") ) }
+  not_if { install_dir.join('tmp','pids',"sunspot-solr-#{node.documentcloud.rails_env}.pid").exist? }
 end
 
 template "/etc/motd" do

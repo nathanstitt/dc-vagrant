@@ -15,41 +15,71 @@ ruby_block 'configure' do
   block do
     require 'erb'
     require 'yaml'
+    Dir.chdir "#{install_dir.to_s}"
     class Rails;   def self.root;  @@root;  end    end
     Rails.send :class_variable_set, :@@root, install_dir
-    config = YAML.load( ERB.new(File.read( install_dir.join('config','database.yml') ) ).result(binding) )[ node.documentcloud.rails_env ]
+    db = YAML.load(
+      ERB.new(File.read( install_dir.join('config','database.yml') ) ).result(binding)
+      )[ node.documentcloud.rails_env ]
 
-#    STDERR.puts config.to_yaml
+    analytics = YAML.load(
+      ERB.new(File.read( install_dir.join('config','database_analytics.yml') ) ).result(binding)
+      )[ node.documentcloud.rails_env ]
 
     bash = Chef::Resource::Script::Bash.new('create-db-account',run_context)
     bash.user 'postgres'
-    code =  "createuser --no-createrole --no-superuser --no-createdb #{config['username']}\n"
-    node['dbname'] = config['database']
+    code =  "createuser --no-createrole --no-superuser --no-createdb #{db['username']}\n"
 
     node['postgresql']['pg_hba'] << {
-      :type => 'local', :db => config['database'], :user => config['username'], :addr => nil, :method => 'trust'
+      :type => 'local', :db => db['database'], :user => db['username'], :addr => nil, :method => 'trust'
     }
 
-    if config['password']
-      code << "psql -c \"ALTER USER #{config['username']} WITH PASSWORD '#{config['password']}'\""
+    if db['password']
+      code << "psql -c \"ALTER USER #{db['username']} WITH PASSWORD '#{db['password']}'\""
     end
     bash.code code
-    bash.not_if  "psql -c \"\\du\" | grep #{config['username']}"
+    bash.not_if  "psql -c \"\\du\" | grep #{db['username']}"
     bash.run_action(:run)
+
+    if analytics['username'] != db['username']
+      bash = Chef::Resource::Script::Bash.new('create-db-account',run_context)
+      bash.user 'postgres'
+      code =  "createuser --no-createrole --no-superuser --no-createdb #{analytics['username']}\n"
+      if analytics['password']
+        code << "psql -c \"ALTER USER #{analytics['username']} WITH PASSWORD '#{analytics['password']}'\""
+      end
+      bash.code code
+      bash.not_if  "psql -c \"\\du\" | grep #{analytics['username']}"
+      bash.run_action(:run)
+    end
 
     bash = Chef::Resource::Script::Bash.new('create-database',run_context)
     bash.user 'postgres'
     bash.cwd install_dir.to_s
     bash.code <<-EOS
-      createdb -O #{config['username']} #{config['database']}
-      psql #{config['database']} < db/development_structure.sql
-      tables=`psql -qAt -c "select tablename from pg_tables where schemaname = 'public';" #{config['database']}`
+      createdb -O #{db['username']} #{db['database']}
+      psql #{db['database']} -c 'create extension if not exists hstore'
+      psql #{db['database']} < db/development_structure.sql
+      tables=`psql -qAt -c "select tablename from pg_tables where schemaname = 'public';" #{db['database']}`
       for tbl in $tables ; do
-        psql -c "alter table $tbl owner to #{config['username']}" #{config['database']};
+        psql -c "alter table $tbl owner to #{db['username']}" #{db['database']};
       done
-
     EOS
-    bash.not_if "psql -l | grep -c #{config['database']}"
+    bash.not_if "psql -l | grep -c #{db['database']}"
+    bash.run_action(:run)
+
+    bash = Chef::Resource::Script::Bash.new('create-analytics-database',run_context)
+    bash.user 'postgres'
+    bash.cwd install_dir.to_s
+    bash.code <<-EOS
+      createdb -O #{analytics['username']} #{analytics['database']}
+      psql #{analytics['database']} < db/analytics_structure.sql
+      tables=`psql -qAt -c "select tablename from pg_tables where schemaname = 'public';" #{analytics['database']}`
+      for tbl in $tables ; do
+        psql -c "alter table $tbl owner to #{analytics['username']}" #{analytics['database']};
+      done
+    EOS
+    bash.not_if "psql -l | grep -c #{analytics['database']}"
     bash.run_action(:run)
 
   end

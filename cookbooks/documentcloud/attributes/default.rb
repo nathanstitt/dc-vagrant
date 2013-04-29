@@ -3,6 +3,15 @@ default[:account][:ssh_keys]=[]
 
 default[:documentcloud][:directory]  = "/home/#{node[:account][:login]}/documentcloud"
 default[:documentcloud][:rails_env]  = 'development'
+
+default[:documentcloud][:organization][:name]  = 'Testing Organization'
+default[:documentcloud][:organization][:slug]  = 'test'
+
+default[:documentcloud][:account][:email]      = 'testing@documentcloud.org'
+default[:documentcloud][:account][:last_name]  = 'Account'
+default[:documentcloud][:account][:first_name] = 'Testing'
+default[:documentcloud][:account][:password]   = 'testingpw'
+
 default[:gems] = {}
 
 default[:documentcloud][:git][:repository] = 'https://github.com/documentcloud/documentcloud.git'

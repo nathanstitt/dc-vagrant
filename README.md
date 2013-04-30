@@ -26,5 +26,18 @@ As part of the provisioning process, a self-signed certificate for https://dev.d
 Because the certificate is self-signed, you will receive a warning in your browser when you load the website.
 
 Depending on which web-browser you are using, you may be able to trust the certificate and proceed.  
-If you are on a Mac, loading the certificate into the OSX keychain will also silence the warning message.
+
+Adam Haeder has a comprehensive video on how Windows users can enable Chrome, Firefox, and Internet Explorer
+to trust a self signed certificate: http://www.youtube.com/watch?v=2P0bJDKQHpc
+
+If you are on a Mac, loading the certificate into the OSX keychain will also silence the warning message.  
+You can do so by using the Chrome web-browser and following these steps *([thanks to Rob Peck](http://www.robpeck.com/blog/2010/10/05/google-chrome-mac-os-x-and-self-signed-ssl-certificates/))*:
+* In the address bar, click the little lock with the X. This will bring up a small information screen. Click the button that says “Certificate Information.”
+* Click and drag the image to your desktop. It looks like a little certificate.
+* Double-click it. This will bring up the Keychain Access utility. Enter your password to unlock it.
+* Be sure you add the certificate to the System keychain, not the login keychain. Click “Always Trust,” even though this doesn’t seem to do anything.
+* After it has been added, double-click it. You may have to authenticate again.
+* Expand the “Trust” section.
+* “When using this certificate,” set to “Always Trust”
+
 

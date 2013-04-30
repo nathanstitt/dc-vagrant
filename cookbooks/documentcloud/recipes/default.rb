@@ -29,7 +29,7 @@ end
 end
 
 # Ruby Gems
-%w{ cloud-crowd sqlite3 pg sanitize right_aws json passenger }.each do | gem |
+%w{ cloud-crowd sqlite3 pg sanitize right_aws json passenger curb }.each do | gem |
   gem_package gem do
     gem_binary '/usr/bin/gem'
     if node['gems'][ gem ] && node['gems']['version']

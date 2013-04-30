@@ -1,6 +1,11 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+require 'yaml'
+require 'erb'
+require File.dirname(__FILE__) + "/lib/hash_deep_merge.rb"
+
+
 Vagrant.configure("2") do |config|
   # All Vagrant configuration is done here. The most common configuration
   # options are documented and commented below. For a complete reference,
@@ -31,6 +36,7 @@ Vagrant.configure("2") do |config|
   # the path on the host to the actual folder. The second argument is
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
+  # config.vm.share_folder "v-data", "/vagrant_data", "../data"
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
@@ -47,65 +53,34 @@ Vagrant.configure("2") do |config|
   # View the documentation for the provider you're using for more
   # information on available options.
 
-  # Enable provisioning with Puppet stand alone.  Puppet manifests
-  # are contained in a directory path relative to this Vagrantfile.
-  # You will need to create the manifests directory and a manifest in
-  # the file precise32.pp in the manifests_path directory.
-  #
-  # An example Puppet manifest to provision the message of the day:
-  #
-  # # group { "puppet":
-  # #   ensure => "present",
-  # # }
-  # #
-  # # File { owner => 0, group => 0, mode => 0644 }
-  # #
-  # # file { '/etc/motd':
-  # #   content => "Welcome to your Vagrant-built virtual machine!
-  # #               Managed by Puppet.\n"
-  # # }
-  #
-  # config.vm.provision :puppet do |puppet|
-  #   puppet.manifests_path = "manifests"
-  #   puppet.manifest_file  = "init.pp"
-  # end
-
   # Enable provisioning with chef solo, specifying a cookbooks path, roles
   # path, and data_bags path (all relative to this Vagrantfile), and adding
   # some recipes and/or roles.
   #
   # Enable and configure the chef solo provisioner
+  local_config = Pathname.new( File.dirname(__FILE__) + "/config.yml" )
+
+
   config.vm.provision :chef_solo do |chef|
     # Vagrant Chef Howto - http://bit.ly/RPC4uI
     chef.cookbooks_path = ["cookbooks"]
     chef.add_recipe 'documentcloud'
     chef.add_recipe 'sudo'
+    chef.add_recipe 'hostname'
 
 #    Enable extra debugging
 #    chef.log_level = :debug
 
     chef.json = {
       :set_fqdn=>'dev.dcloud.org',
-      :account => {
-        :ssh_keys => [
-          'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key'
-          ]
-      },
       :documentcloud=>{
         :account=>{
-          :login => 'dcloud',
+          :login => 'testing@documentcloud.org',
           :password=> 'testingpw'
         },
         :git=>{
           :repository => 'https://github.com/nathanstitt/documentcloud.git',
           :branch     => 'chef'
-        }
-      },
-      "authorization" => {
-        "groups" => ["admin", "wheel", "sysadmin"],
-        "sudo" => {
-          "users" => ['vagrant'],
-          "passwordless" => true
         }
       },
       'postgresql'=>{
@@ -114,28 +89,10 @@ Vagrant.configure("2") do |config|
         }
       }
     }
-  end
 
-  # Enable provisioning with chef server, specifying the chef server URL,
-  # and the path to the validation key (relative to this Vagrantfile).
-  #
-  # The Opscode Platform uses HTTPS. Substitute your organization for
-  # ORGNAME in the URL and validation key.
-  #
-  # If you have your own Chef Server, use the appropriate URL, which may be
-  # HTTP instead of HTTPS depending on your configuration. Also change the
-  # validation key to validation.pem.
-  #
-  # config.vm.provision :chef_client do |chef|
-  #   chef.chef_server_url = "https://api.opscode.com/organizations/ORGNAME"
-  #   chef.validation_key_path = "ORGNAME-validator.pem"
-  # end
-  #
-  # If you're using the Opscode platform, your validator client is
-  # ORGNAME-validator, replacing ORGNAME with your organization name.
-  #
-  # If you have your own Chef Server, the default validation client name is
-  # chef-validator, unless you changed the configuration.
-  #
-  #   chef.validation_client_name = "ORGNAME-validator"
+    if local_config.exist?
+      HashMerge.perform( chef.json,  YAML.load( ERB.new( local_config.read ).result(binding) ) )
+    end
+
+  end
 end

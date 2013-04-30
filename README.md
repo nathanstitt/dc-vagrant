@@ -9,11 +9,12 @@ Instructions
 * Download Vagrant version 1.2 or newer from: http://downloads.vagrantup.com/ and then install it.
 * Clone this repository
 * In the terminal, change directory to where the repository was cloned.
-* start vagrant provisioning process by typing:  **vagrant up** and then pressing enter.
-  * After doing so, you'll see quite a bit of green text scroll by on the screen
+* start vagrant provisioning process by typing: ```vagrant up``` and then pressing enter.
+  * After doing so, you'll see quite a few status messages scroll by on the screen.
   * This process will take at least 10 minutes and probably quite a bit more longer on the speed of your computer and internet connection.
 * Once the provisioning process completes, you should be able to load your new Document Cloud virtual machine at http://192.168.33.10/
-* The IP address and many other settings may be modified by editing the Vagrantfile in the directory.
+* The login by default is: ```testing@documentcloud.org``` and password: ```testingpw```
+* The IP address, login/password, and many other settings may be modified by editing the Vagrantfile in the directory.
 
 
 ### Encryption

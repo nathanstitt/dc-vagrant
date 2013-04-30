@@ -85,7 +85,6 @@ Vagrant.configure("2") do |config|
 #    chef.log_level = :debug
 
     chef.json = {
-      :login => 'documentcloud',
       :set_fqdn=>'dev.dcloud.org',
       :account => {
         :ssh_keys => [
@@ -93,6 +92,10 @@ Vagrant.configure("2") do |config|
           ]
       },
       :documentcloud=>{
+        :account=>{
+          :login => 'dcloud',
+          :password=> 'testingpw'
+        },
         :git=>{
           :repository => 'https://github.com/nathanstitt/documentcloud.git',
           :branch     => 'chef'

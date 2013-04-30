@@ -57,7 +57,7 @@ ruby_block 'configure' do
     bash.user 'postgres'
     bash.cwd install_dir.to_s
     bash.code <<-EOS
-      createdb -O #{db['username']} #{db['database']}
+      createdb  --template=template0 --locale=en_US.utf8 --encoding=UTF8 --owner=#{db['username']} #{db['database']}
       psql #{db['database']} -c 'create extension if not exists hstore'
       psql #{db['database']} < db/development_structure.sql
       tables=`psql -qAt -c "select tablename from pg_tables where schemaname = 'public';" #{db['database']}`
@@ -65,21 +65,21 @@ ruby_block 'configure' do
         psql -c "alter table $tbl owner to #{db['username']}" #{db['database']};
       done
     EOS
-    bash.not_if "psql -l | grep -c #{db['database']}"
+    bash.not_if "psql -l | grep #{db['database']}"
     bash.run_action(:run)
 
     bash = Chef::Resource::Script::Bash.new('create-analytics-database',run_context)
     bash.user 'postgres'
     bash.cwd install_dir.to_s
     bash.code <<-EOS
-      createdb -O #{analytics['username']} #{analytics['database']}
+      createdb  --template=template0 --locale=en_US.utf8 --encoding=UTF8 --owner=#{analytics['username']} #{analytics['database']}
       psql #{analytics['database']} < db/analytics_structure.sql
       tables=`psql -qAt -c "select tablename from pg_tables where schemaname = 'public';" #{analytics['database']}`
       for tbl in $tables ; do
         psql -c "alter table $tbl owner to #{analytics['username']}" #{analytics['database']};
       done
     EOS
-    bash.not_if "psql -l | grep -c #{analytics['database']}"
+    bash.not_if "psql -l | grep #{analytics['database']}"
     bash.run_action(:run)
 
   end

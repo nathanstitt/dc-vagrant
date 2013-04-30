@@ -14,7 +14,7 @@ Instructions
   * This process will take at least 10 minutes and probably quite a bit longer depending on the speed of your computer and internet connection.
 * Once the provisioning process completes, you should be able to load your new DocumentCloud virtual machine at http://192.168.33.10/
 * The default login is: ```testing@documentcloud.org``` and password: ```testingpw```
-* The IP address, login/password, and many other settings may be modified by editing the Vagrantfile in the directory.
+* The IP address, login/password, and many other settings may be modified by editing the chef.json area of the Vagrantfile.
 
 
 ### Encryption

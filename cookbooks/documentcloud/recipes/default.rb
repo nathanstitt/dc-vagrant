@@ -57,7 +57,8 @@ end
 
 ruby_block "copy-server-secrets" do
   block do
-    FileUtils.cp_r( install_dir.join('config','server','secrets'), install_dir ) 
+    FileUtils.cp_r( install_dir.join('config','server','secrets'), install_dir )
+    FileUtils.chown_R user_id, nil, install_dir
   end
   action :nothing
 end
@@ -73,6 +74,7 @@ bash "install-rails" do
     # nasty, but otherwise cloud crowd will complain later
     # need to implement bundler support
     gem uninstall rack --version '>=1.5'
+    chown -R #{user_id} #{install_dir}/log
   EOS
   not_if "gem list rails | grep  `grep -E -o 'RAILS_GEM_VERSION.*[0-9]+\.[0-9]+\.[0-9]+' #{install_dir}/config/environment.rb | cut -d\\' -f2`"
 end

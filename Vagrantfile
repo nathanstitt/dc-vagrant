@@ -5,6 +5,10 @@ require 'yaml'
 require 'erb'
 require File.dirname(__FILE__) + "/lib/hash_deep_merge.rb"
 
+# If a config.yml file is present in the same directory,
+# Read the configuration settings from it
+local_config_file = Pathname.new( File.dirname(__FILE__) + "/config.yml" )
+CUSTOM_CONFIG = local_config_file.exist? ? YAML.load( ERB.new( local_config_file.read ).result(binding) ) : {}
 
 Vagrant.configure("2") do |config|
   # All Vagrant configuration is done here. The most common configuration
@@ -38,6 +42,19 @@ Vagrant.configure("2") do |config|
   # argument is a set of non-required options.
   # config.vm.share_folder "v-data", "/vagrant_data", "../data"
 
+  # after provisioning, you can share the documentcloud install directory
+  # with your computer like so.
+  # Consult http://docs.vagrantup.com/v2/synced-folders/basic_usage.html
+  # for details
+  #   config.vm.synced_folder "../documentcloud", "/home/dcloud/documentcloud",  :owner => "dcloud"
+
+  if CUSTOM_CONFIG[:sync_folders]
+    CUSTOM_CONFIG[:sync_folders].each do | folder |
+      config.vm.synced_folder folder[:local], folder[:remote], folder[:options]
+    end
+  end
+
+
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
   # Example for VirtualBox:
@@ -58,9 +75,6 @@ Vagrant.configure("2") do |config|
   # some recipes and/or roles.
   #
   # Enable and configure the chef solo provisioner
-  local_config = Pathname.new( File.dirname(__FILE__) + "/config.yml" )
-
-
   config.vm.provision :chef_solo do |chef|
     # Vagrant Chef Howto - http://bit.ly/RPC4uI
     chef.cookbooks_path = ["cookbooks"]
@@ -90,9 +104,7 @@ Vagrant.configure("2") do |config|
       }
     }
 
-    if local_config.exist?
-      HashMerge.perform( chef.json,  YAML.load( ERB.new( local_config.read ).result(binding) ) )
-    end
+    HashMerge.perform( chef.json, CUSTOM_CONFIG )
 
   end
 end

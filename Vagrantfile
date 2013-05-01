@@ -8,7 +8,7 @@ require File.dirname(__FILE__) + "/lib/hash_deep_merge.rb"
 # If a config.yml file is present in the same directory,
 # Read the configuration settings from it
 local_config_file = Pathname.new( File.dirname(__FILE__) + "/config.yml" )
-CUSTOM_CONFIG = local_config_file.exist? ? YAML.load( ERB.new( local_config_file.read ).result(binding) ) : {}
+CONFIG = local_config_file.exist? ? YAML.load( ERB.new( local_config_file.read ).result(binding) ) : {}
 
 Vagrant.configure("2") do |config|
   # All Vagrant configuration is done here. The most common configuration
@@ -48,8 +48,8 @@ Vagrant.configure("2") do |config|
   # for details
   #   config.vm.synced_folder "../documentcloud", "/home/dcloud/documentcloud",  :owner => "dcloud"
 
-  if CUSTOM_CONFIG[:sync_folders]
-    CUSTOM_CONFIG[:sync_folders].each do | folder |
+  if CONFIG[:sync_folders]
+    CONFIG[:sync_folders].each do | folder |
       config.vm.synced_folder folder[:host], folder[:guest], folder[:options]
     end
   end
@@ -79,7 +79,9 @@ Vagrant.configure("2") do |config|
     # Vagrant Chef Howto - http://bit.ly/RPC4uI
     chef.cookbooks_path = ["cookbooks"]
     chef.add_recipe 'documentcloud'
-    chef.add_recipe 'sudo'
+    if CONFIG[:authorization]
+      chef.add_recipe 'sudo'
+    end
     chef.add_recipe 'hostname'
 
 #    Enable extra debugging
@@ -104,7 +106,7 @@ Vagrant.configure("2") do |config|
       }
     }
 
-    HashMerge.perform( chef.json, CUSTOM_CONFIG )
+    HashMerge.perform( chef.json, CONFIG )
 
   end
 end

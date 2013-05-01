@@ -50,7 +50,7 @@ Vagrant.configure("2") do |config|
 
   if CUSTOM_CONFIG[:sync_folders]
     CUSTOM_CONFIG[:sync_folders].each do | folder |
-      config.vm.synced_folder folder[:local], folder[:remote], folder[:options]
+      config.vm.synced_folder folder[:host], folder[:guest], folder[:options]
     end
   end
 

@@ -1,0 +1,52 @@
+---
+# The fully qualified network name
+:set_fqdn: 'dev.dcloud.org'
+# A user account to setup.
+# Passwords are not setup, so at least one ssh key must be given
+:account:
+  :login: dcloud
+  :ssh_keys:
+    - ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key
+## SUDO
+:authorization:
+## these users will be able to use sudo
+## the vagrant user MUST be left in this list, otherwise vagrant will not function
+  :sudo:
+    :users:
+      - dcloud
+      - vagrant
+## will they be able to use sudo without entering 
+## their password.  Since the login does not have a 
+## password, this must be always left as true
+    :passwordless: true
+
+
+## Settings specific to the documentcloud application
+:documentcloud:
+# Account for the website
+  :account:
+    :login: mylogin@test.com
+    :password: redrabbitgoesfast
+    :lastname: MyLastName
+    :firstname: MyFirstName
+  :organization:
+    :name: Testing Organization Only
+    :slug: test
+
+# folders to syncronize between VM guest and host
+# Do not enable this until at least one complete provisioning 
+# run has completed.
+
+# The system must be configured fully before the DocumentCloud application
+# is redirected
+
+# This is commented out so that (hopefully) no-one enables it prematurely
+
+# The guest path needs to be the same as where the documentcloud surce was configured at
+
+# :sync_folders:
+#   - 
+#     :host: ../documentcloud
+#     :guest: /home/dcloud/documentcloud
+#     :options: 
+#       :owner: dcloud

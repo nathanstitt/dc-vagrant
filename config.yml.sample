@@ -32,6 +32,9 @@
   :organization:
     :name: Testing Organization Only
     :slug: test
+  :git:
+    :repository: https://github.com/documentcloud/documentcloud.git
+    :branch: master
 
 # folders to syncronize between VM guest and host
 # Do not enable this until at least one complete provisioning 

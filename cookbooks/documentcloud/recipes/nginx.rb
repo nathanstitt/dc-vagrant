@@ -1,18 +1,18 @@
-nginx_path  = Pathname.new node[:nginx][:install_path]
+nginx_path  = Pathname.new node['nginx']['install_path']
 nginx_conf  = nginx_path.join( 'conf','nginx.conf' )
 
 bash "install passenger/nginx" do
   user "root"
   code <<-EOS
-     passenger-install-nginx-module --auto --auto-download --prefix=#{nginx_path}  --extra-configure-flags='#{node[:nginx][:config_flags]}'
+     passenger-install-nginx-module --auto --auto-download --prefix=#{nginx_path}  --extra-configure-flags='#{node['nginx']['config_flags']}'
     mkdir -p #{nginx_path}/conf/sites-enabled
   EOS
   not_if { nginx_path.exist? }
 end
 
 directory node.nginx.log_directory do
-  owner node[:nginx][:user]
-  group node[:nginx][:group]
+  owner node['nginx']['user']
+  group node['nginx']['group']
   mode 0644
   action :create
   not_if { File.exists?( node.nginx.log_directory ) }

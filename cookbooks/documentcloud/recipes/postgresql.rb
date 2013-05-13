@@ -1,4 +1,4 @@
-install_dir = Pathname.new node[:documentcloud][:directory]
+install_dir = Pathname.new node['documentcloud']['directory']
 
 template "#{node['postgresql']['dir']}/pg_hba.conf" do
   source "pg_hba.conf.erb"

@@ -1,0 +1,8 @@
+
+:central_server:      http://master.dcloud.org:8080
+:max_workers:         2
+:storage:             filesystem
+:work_unit_retries:   1
+:actions_path:        <%= node.documentcloud.directory %>/app/actions
+:log_path:            <%= node.documentcloud.directory %>/log/<%= node.host_name %>
+:pid_path:            <%= node.documentcloud.directory %>/tmp/pids/<%= node.host_name %>

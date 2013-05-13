@@ -10,6 +10,6 @@ supports "ubuntu"
 
 recipe "documentcloud", "Installs a documentcloud instance"
 
-%w{ hostname apt git postgresql ssh_known_hosts user rake }.each do |cb|
+%w{ hostname apt git postgresql ssh_known_hosts user rake hostsfile }.each do |cb|
   depends cb
 end

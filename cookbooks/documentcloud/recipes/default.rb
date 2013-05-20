@@ -122,7 +122,7 @@ rake 'cloud-crowd-server' do
   working_directory install_dir.to_s
   notifies :run, "rake[cloud-crowd-node]"
   action :run
-  not_if "ps -p `cat #{install_dir}/tmp/pids/server.pid`"
+  not_if "pgrep -f cloud-crowd-server"
 end
 
 rake 'cloud-crowd-node' do
@@ -130,7 +130,7 @@ rake 'cloud-crowd-node' do
   working_directory install_dir.to_s
   arguments 'crowd:node:start'
   action :run
-  not_if "ps -p `cat #{install_dir}/tmp/pids/node.pid`"
+  not_if "pgrep -f cloud-crowd-node"
 end
 
 rake 'sunspot-solr' do

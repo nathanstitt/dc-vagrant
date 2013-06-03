@@ -96,6 +96,7 @@ ruby "configure-account" do
   user user_id
   cwd install_dir.to_s
   code <<-EOS
+  require 'rubygems'
   require "./config/environment"
 
   organization = Organization.find_or_create_by_id(1)

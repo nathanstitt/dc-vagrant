@@ -70,10 +70,6 @@ bash "install-rails" do
   cwd install_dir.to_s
   code <<-EOS
     bundle install
-    # # nasty, but otherwise cloud crowd will complain later
-    # # need to implement bundler support
-    # gem uninstall rack --version '>=1.5'
-    # chown -R #{user_id} #{install_dir}/log
   EOS
 end
 
@@ -128,6 +124,7 @@ ruby "configure-account" do
   user user_id
   cwd install_dir.to_s
   code <<-EOS
+  require 'rubygems'
   require "./config/environment"
 
   organization = Organization.find_or_create_by_id(1)
@@ -145,7 +142,6 @@ ruby "configure-account" do
     organization.add_member( account, Account::ADMINISTRATOR )
   end
   EOS
-#  not_if { install_dir.join('cloud_crowd.db').exist? }
 end
 
 rake 'cloud-crowd-server' do

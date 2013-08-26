@@ -29,7 +29,7 @@ end
 end
 
 # Ruby Gems
-%w{ cloud-crowd sqlite3 pg sanitize right_aws json passenger curb }.each do | gem |
+%w{ cloud-crowd sqlite3 pg bundler passenger }.each do | gem |
   gem_package gem do
     gem_binary '/usr/bin/gem'
     if node['gems'][ gem ] && node['gems']['version']
@@ -69,14 +69,12 @@ bash "install-rails" do
   user "root"
   cwd install_dir.to_s
   code <<-EOS
-    /usr/bin/gem install --no-ri --no-rdoc rails -v `grep -E -o \'RAILS_GEM_VERSION.*[0-9]+\.[0-9]+\.[0-9]+\' config/environment.rb | cut -d\\' -f2`
-    rake gems:install
-    # nasty, but otherwise cloud crowd will complain later
-    # need to implement bundler support
-    gem uninstall rack --version '>=1.5'
-    chown -R #{user_id} #{install_dir}/log
+    bundle install
+    # # nasty, but otherwise cloud crowd will complain later
+    # # need to implement bundler support
+    # gem uninstall rack --version '>=1.5'
+    # chown -R #{user_id} #{install_dir}/log
   EOS
-  not_if "gem list rails | grep  `grep -E -o 'RAILS_GEM_VERSION.*[0-9]+\.[0-9]+\.[0-9]+' #{install_dir}/config/environment.rb | cut -d\\' -f2`"
 end
 
 # bash "install-rails" do

@@ -100,8 +100,8 @@ Vagrant.configure("2") do |config|
           :password=> 'testingpw'
         },
         :git=>{
-          :repository => 'https://github.com/nathanstitt/documentcloud.git',
-          :branch     => 'chef'
+          :repository => 'https://github.com/documentcloud/documentcloud.git',
+          :branch     => 'master'
         }
       },
       'postgresql'=>{

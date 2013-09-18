@@ -63,7 +63,7 @@ Create or edit the config.yml file by using the config.yml.sample as a template.
 Setup the sync_folders section.
 
 * The host setting should point to the path to the directory where you checked out the source.  Relative or absolute paths are acceptable.
-* The guest setting refers to the path inside the virtual machine where the documentcloud source resides.  By default this is: /hom/dcloud/documentcloud
+* The guest setting refers to the path inside the virtual machine where the documentcloud source resides.  By default this is: /home/dcloud/documentcloud
 * The options -> owner setting must be set to same as the account/login.  It defaults to: ```dcloud```
 
 Restart vagrant with: ```vagrant up```

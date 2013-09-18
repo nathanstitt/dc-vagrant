@@ -1,3 +1,4 @@
 tmp
 .vagrant
 config.yml
+package_cache

@@ -28,8 +28,9 @@ end
   package 'tesseract-ocr-' + language_code
 end
 
+
 # Ruby Gems
-%w{ cloud-crowd sqlite3 pg bundler passenger }.each do | gem |
+%w{ cloud-crowd sqlite3 pg bundler passenger libxml-ruby }.each do | gem |
   gem_package gem do
     gem_binary '/usr/bin/gem'
     if node['gems'][ gem ] && node['gems']['version']
@@ -130,11 +131,13 @@ ruby "configure-account" do
   organization = Organization.find_or_create_by_id(1)
   organization.slug = "#{node.documentcloud.organization.slug}"
   organization.name = "#{node.documentcloud.organization.name}"
+  organization.language = organization.document_language = 'eng'
   organization.save!
 
   account = Account.find_or_create_by_email("#{node.documentcloud.account.email}")
   account.first_name = "#{node.documentcloud.account.first_name}"
   account.last_name  = "#{node.documentcloud.account.last_name}"
+  account.language = account.document_language = 'eng'
   account.hashed_password = BCrypt::Password.create( "#{node.documentcloud.account.password}" )
   account.save!
 
@@ -144,26 +147,16 @@ ruby "configure-account" do
   EOS
 end
 
-rake 'cloud-crowd-server' do
-  user user_id
-  arguments 'crowd:server:start'
-  working_directory install_dir.to_s
-  notifies :run, "rake[cloud-crowd-node]"
-  action :run
+template '/etc/init.d/documentcloud' do
+  source 'documentcloud.init.erb'
+  mode   '0711'
+  notifies :enable, "service[documentcloud]"
+  notifies :start, "service[documentcloud]"
 end
 
-rake 'cloud-crowd-node' do
-  user user_id
-  working_directory install_dir.to_s
-  arguments 'crowd:node:start'
-  action :run
-end
-
-rake 'sunspot-solr' do
-  user user_id
-  working_directory install_dir.to_s
-  arguments 'sunspot:solr:start'
-  action :run
+service "documentcloud" do
+  supports :restart => true, :start => true, :stop => true
+  action :start
 end
 
 template "/etc/motd" do

@@ -1,0 +1,6 @@
+{
+  "account":{
+    "login": "ubuntu"
+  },
+  "run_list": ["recipe[documentcloud::crowd-node]"]
+}

@@ -1,0 +1,27 @@
+#! /bin/sh
+
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+NAME=<%= @name %>
+DIR=<%= node[:documentcloud][:directory] %>
+ENV=<%= @enviroment %>
+
+case "$1" in
+  start)
+        echo -n "Starting $NAME: "
+        su -l -c "cd $DIR; bundle exec rake $ENV <%= @task %>:start"   <%= node[:account][:login] %>
+        ;;
+  stop)
+        echo -n "Stopping $NAME: "
+        su -l -c "cd $DIR; bundle exec rake $ENV <%= @task %>:stop"   <%= node[:account][:login] %>
+        ;;
+  restart|force-reload)
+        su -l -c "cd $DIR; bundle exec rake $ENV <%= @task %>:restart"   <%= node[:account][:login] %>
+        ;;
+  *)
+        N=/etc/init.d/$NAME
+        echo "Usage: $N {start|stop|restart}" >&2
+        exit 1
+        ;;
+
+esac

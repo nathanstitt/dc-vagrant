@@ -1,0 +1,68 @@
+---
+# A user account to setup.
+# Passwords are not setup, so at least one ssh key must be given
+account:
+  login: 'nas'
+  ssh_keys:
+    - ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA79axmxvacNyc5b1/572JnjeKC3+ubhlmzWwKqVOlsKtxvKYc/IEPu9q5xnTxEhqoiP818+irazMumkKWlK3eqJavaMtvE05lmYCrdupJqWhC/S+SfR887vpH0qVLttnIUXBgRMtCSk9x7TTDABd/nUYXHQdElsPsaR6Wt4NRUEBiXqagWvXhYM0VSn5HlTyW5ZYKNbVDmKQ0IkLfoZA/2bC2+AZECtkWdG0f6RY7raUTPtri6bkFSA6z6vBNyeZVm5kLsOHwTFlb9TkfMmgYQ7W4qm52C7x8dIm+W0uS4HdYgmvXEwF7IDbZsKP5BDNWwJIpUBUNTXBZMdx+scT3NQ== nathan@stitt.org
+    - ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key
+## SUDO
+authorization:
+## these users will be able to use sudo
+## the vagrant user MUST be left in this list, otherwise vagrant will not function
+  sudo:
+    users:
+      - nas
+      - vagrant
+## will they be able to use sudo without entering 
+## their password.  Since the login does not have a 
+## password, this must be always left as true
+    passwordless: true
+
+## Settings specific to the documentcloud application
+documentcloud:
+# Account for the website
+  account:
+    email: nathan@stitt.org
+    password: giqGU8dg
+# folders to syncronize between VM guest and host
+# Do not enable this until at least one complete provisioning 
+# run has completed.
+
+# The system must be configured fully before the DocumentCloud application
+# is redirected
+
+# This is commented out so that (hopefully) no-one enables it prematurely
+
+local_host_aliases:
+  - lorum.dev
+
+sync_folders:
+  -
+    host: ../apt
+    guest: /var/cache/apt/archives
+
+  # - 
+  #   host: ../documentcloud
+  #   guest: /home/nas/documentcloud
+  #   options: 
+  #     :owner: nas
+  #     :group: nas
+  # -
+  #   host: ../document-viewer
+  #   guest: /home/nas/document-viewer
+  #   options: 
+  #     :owner: nas
+  #     :group: nas
+  # -
+  #   host: ../cloud-crowd
+  #   guest: /home/nas/cloud-crowd
+  #   options: 
+  #     :owner: nas
+  #     :group: nas
+  # -
+  #   host: ../jammit
+  #   guest: /home/nas/jammit
+  #   options: 
+  #     :owner: nas
+  #     :group: nas

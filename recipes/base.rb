@@ -103,9 +103,7 @@ bash "no-rdoc" do
   not_if "grep no-document .gemrc"
 end
 
-# json eventmachine pg thin cloud-crowd sqlite3 libxml-ruby
-
-%w{ bundler mime-types sqlite3 pg cloud-crowd }.each do | gem |
+%w{ bundler mime-types sqlite3 pg cloud-crowd libxml-ruby }.each do | gem |
   cmd = "#{rb_path}/gem install #{gem}"
   cmd << " --version #{node.gem_versions[gem]}" if node.gem_versions[ gem ]
   bash "install-#{gem}-gem" do
